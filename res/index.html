@@ -1,39 +1,27 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Markdown Editor</title>
-    <script src="qrc:/marked.umd.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const editor = document.getElementById('editor');
-            const preview = document.getElementById('preview');
-
-            editor.contentEditable = true;
-
-            function renderMarkdown(markdown) {
-                preview.innerHTML = marked(markdown);
-            }
-
-            editor.addEventListener('input', function() {
-                const content = editor.innerText;
-                renderMarkdown(content);
-            });
-
-            // 初始渲染
-            renderMarkdown(editor.innerText);
-
-            // 调试信息
-            console.log("Editor and preview initialized.");
-        });
-    </script>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="qrc:/res/3rdparty/markdown.css">
+    <script src="qrc:/res/3rdparty/marked.umd.js"></script>
+    <script src="qrc:/qtwebchannel/qwebchannel.js"></script>
 </head>
 <body>
-    <div id="editor" contenteditable="true" style="border: 1px solid #ccc; padding: 10px; margin-bottom: 20px;">
-        # Hello, Markdown!
-    </div>
-    <div id="preview" style="border: 1px solid #ccc; padding: 10px;">
-        <p>Preview will appear here as you type.</p>
-    </div>
+    <div id="placeholder"></div>
+    <script>
+        'use strict';
+
+        var placeholder = document.getElementById('placeholder');
+
+        var updateText = function(text) {
+            placeholder.innerHTML = marked(text);
+        };
+
+        new QWebChannel(qt.webChannelTransport, function(channel) {
+            var content = channel.objects.content;
+            updateText(content.text);
+            content.textChanged.connect(updateText);
+        });
+    </script>
 </body>
 </html>

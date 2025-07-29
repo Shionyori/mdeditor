@@ -1,18 +1,20 @@
+# 设置最小 CMake 版本
 cmake_minimum_required(VERSION 3.19)
 
+# 设置项目名称和版本
 project(MarkdownEditor VERSION 0.1 LANGUAGES CXX)
 
-# Qt元对象系统
+# Qt 元对象系统
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-# C++标准
+# C++ 标准
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# 查找Qt6
+# 查找 Qt6
 find_package(Qt6 REQUIRED COMPONENTS
     Core
     Gui
@@ -26,6 +28,8 @@ set(PROJECT_SOURCES
     src/main.cpp
     src/MainWindow.h
     src/MainWindow.cpp
+    src/document.h
+    src/document.cpp
 )
 
 # 资源文件
