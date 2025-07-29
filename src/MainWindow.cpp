@@ -1,67 +1,56 @@
 #include "MainWindow.h"
+#include <QApplication>
+#include <QWebChannel>
+#include <QFile>
+#include <QTextStream>
+#include <QMessageBox>
+#include <QFileDialog>
+#include <QMenuBar>
+#include <QMenu>
+#include <QAction>
+#include <QDebug>
 
-MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent)
 {
-    editor = new QPlainTextEdit(this);
+    // 创建WebEngineView
+    view = new QWebEngineView(this);
+    view->setUrl(QUrl("qrc:/index.html"));
 
-    preview = new QWebEngineView(this);
-    preview->setUrl(QUrl("qrc:/index.html"));
+    // 设置WebChannel
+    channel = new QWebChannel(this);
+    view->page()->setWebChannel(channel);
 
-    QWidget *centralWidget = new QWidget(this);
-    QVBoxLayout *layout = new QVBoxLayout(centralWidget);
-    layout->addWidget(editor);
-    layout->addWidget(preview);
-    centralWidget->setLayout(layout);
-    setCentralWidget(centralWidget);
+    // 设置主窗口的中心部件
+    setCentralWidget(view);
 
+    // 创建菜单栏
     QMenuBar *menuBar = new QMenuBar(this);
     QMenu *fileMenu = menuBar->addMenu(tr("&File"));
-    QAction *openAction = fileMenu->addAction(tr("&Open..."));
+    QAction *openAction = fileMenu->addAction(tr("&Open File..."));
     connect(openAction, &QAction::triggered, this, &MainWindow::openFile);
-    QAction *saveAction = fileMenu->addAction(tr("&Save..."));
-    connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
     setMenuBar(menuBar);
-
-    QWebChannel *channel = new QWebChannel(this);
-    preview->page()->setWebChannel(channel);
-
-    connect(editor, &QPlainTextEdit::textChanged, this, &MainWindow::updatePreview);
 }
 
-MainWindow::~MainWindow(){};
+MainWindow::~MainWindow() = default;
 
-void MainWindow::openFile() 
+void MainWindow::openFile()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Markdown File"), "", tr("Markdown Files (*.md);;All Files (*)"));
-    if(!fileName.isEmpty())
-    {
-        QFile file(fileName);
-        if(file.open(QIODevice::ReadOnly | QIODevice::Text))
-        {
+    QString filePath = QFileDialog::getOpenFileName(this, tr("Open Markdown File"), "", tr("Markdown Files (*.md);;All Files (*)"));
+    if (!filePath.isEmpty()) {
+        QFile file(filePath);
+        if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             QTextStream in(&file);
-            editor->setPlainText(in.readAll());
+            QString content = in.readAll();
             file.close();
+
+            // 打印文件内容以确保内容正确加载
+            qDebug() << "Loaded content:" << content;
+
+            // 将内容传递到JavaScript进行渲染
+            view->page()->runJavaScript(QString("editor.innerText = %1; renderMarkdown(editor.innerText);").arg(content));
+        } else {
+            QMessageBox::critical(this, tr("Error"), tr("Failed to open file: %1").arg(filePath));
         }
     }
-}
-
-void MainWindow::saveFile()
-{
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save Markdown File"), "", tr("Markdown Files (*.md);;All Files (*)"));
-    if (!fileName.isEmpty()) 
-    {
-        QFile file(fileName);
-        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) 
-        {
-            QTextStream out(&file);
-            out << editor->toPlainText();
-            file.close();
-        }
-    }
-}
-
-void MainWindow::updatePreview()
-{
-    QString md = editor->toPlainText();
-    preview->page()->runJavaScript(QString("renderMarkdown(%1)").arg(md));
 }

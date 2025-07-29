@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/index.html</file>
+        <file>res/marked.umd.js</file>
+    </qresource>
+</RCC>
