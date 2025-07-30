@@ -43,7 +43,7 @@ private:
 
     void createActions();
     void createMenus();
-    void createToolBars();
+    void initDefaultFile(QString defaultFilePath);
 };
 
 #endif // MAINWINDOW_H

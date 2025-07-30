@@ -4,37 +4,65 @@
 #include "Toolbar.h"
 #include <QSplitter>
 #include <QBoxLayout>
+#include <QDockWidget>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
 setStyleSheet(
     "QWidget { background-color: #e8e8fa; color: #333333; }"
-    "QToolBar { background-color: #d8d8f8; border: none; }"
-    "QMenuBar { background-color: #e8e8fa; }"
+    "QToolBar { background-color: #c9c9ff; border: none; }"
+    "QMenuBar { background-color: #acacfa; }"
     "QMenuBar::item { color: #333333; }"
-    "QMenuBar::item:hover, QMenuBar::item:selected { background-color: #b8b8d8; }"
-    "QMenu { background-color: rgba(232, 232, 250, 192); border: 1px solid #b8b8d8;}"
+    "QMenuBar::item:hover, QMenuBar::item:selected { background-color: #7b7bdb; }"
+    "QMenu { background-color: rgba(232, 232, 250, 192); border: 1px solid #7b7bdb;}"
     "QMenu::item { color: #333333; }"
-    "QMenu::item:hover, QMenu::item:selected { background-color: #b8b8d8; }"
-    "QPushButton { background-color: #d8d8f8; border: none; padding: 2px; border-radius: 2px; }"
-    "QPushButton:hover { background-color: #b8b8d8; }"
-    "QPushButton:pressed { background-color: #a8a8c8; }"
+    "QMenu::item:hover, QMenu::item:selected { background-color: #7b7bdb; }"
+    "QPushButton { background-color: #c9c9ff; border: none; padding: 2px; border-radius: 2px; }"
+    "QPushButton:hover { background-color: #adadd7; }"
+    "QPushButton:pressed { background-color: #a4a4cd; }"
 );
-
 
     // 创建编辑器和预览窗口
     editor = new QTextEdit(this);
     preview = new QWebEngineView(this);
 
-    // 创建水平分割器
-    QSplitter* splitter = new QSplitter(Qt::Horizontal, this);
-    splitter->addWidget(editor);
-    splitter->addWidget(preview);
-    splitter->setSizes({300, 600});
+    // 创建工具栏
+    QToolBar* toolbar = addToolBar("工具栏");
+    toolbar->addWidget(new Toolbar(editor));
+
+    // // 创建水平分割器
+    // QSplitter* splitter = new QSplitter(Qt::Horizontal, this);
+    // splitter->addWidget(editor);
+    // splitter->addWidget(preview);
+    // splitter->setSizes({300, 600});
 
     // 设置主窗口的中心部件
-    setCentralWidget(splitter);
+    // setCentralWidget(splitter);
+
+    // 创建 Dock Widgets
+    QDockWidget* editorDock = new QDockWidget("编辑器", this);
+    editorDock->setWidget(editor);
+    editorDock->setObjectName("EditorDock");
+    addDockWidget(Qt::LeftDockWidgetArea, editorDock);
+
+    QDockWidget* previewDock = new QDockWidget("预览", this);
+    previewDock->setWidget(preview);
+    previewDock->setObjectName("PreviewDock");
+    addDockWidget(Qt::RightDockWidgetArea, previewDock);
+
+    // 禁用停靠到上下区域
+    setDockOptions(QMainWindow::AllowNestedDocks);
+    editorDock->setFeatures(QDockWidget::DockWidgetMovable); // 禁用浮动
+    previewDock->setFeatures(QDockWidget::DockWidgetMovable); // 禁用浮动
+
+    // 设置默认停靠关系
+    splitDockWidget(editorDock, previewDock, Qt::Horizontal);
+    resizeDocks({editorDock, previewDock}, {1, 2}, Qt::Horizontal); // 设置初始比例
+
+    // 设置最小宽度限制
+    editorDock->setMinimumSize(200, 150); 
+    previewDock->setMinimumSize(200, 150); 
 
     // 监听编辑器内容变化
     connect(editor, &QTextEdit::textChanged, this, &MainWindow::updatePreview);
@@ -43,25 +71,9 @@ setStyleSheet(
     createActions();
     // 创建菜单
     createMenus();
-    // 创建工具栏
-    createToolBars();
 
     // 指定默认文件的绝对路径
-    QString defaultFilePath = QDir::currentPath() + "/res/default.md";
-    if (QFile::exists(defaultFilePath)) {
-        QFile file(defaultFilePath);
-        if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            QTextStream in(&file);
-            QString content = in.readAll();
-            editor->setPlainText(content);
-            file.close();
-            currentFilePath = defaultFilePath;
-        } else {
-            QMessageBox::critical(this, "错误", "无法打开默认文件");
-        }
-    } else {
-        QMessageBox::information(this, "提示", "默认文件不存在，将创建一个新文件。");
-    }
+    initDefaultFile(QDir::currentPath() + "/res/default.md");
 }
 
 void MainWindow::updatePreview()
@@ -161,8 +173,20 @@ void MainWindow::createMenus()
     fileMenu->addAction(saveAsAction);
 }
 
-void MainWindow::createToolBars()
+void MainWindow::initDefaultFile(QString defaultFilePath)
 {
-    QToolBar* toolbar = addToolBar("Markdown");
-    toolbar->addWidget(new Toolbar(editor));
+    if (QFile::exists(defaultFilePath)) {
+        QFile file(defaultFilePath);
+        if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QTextStream in(&file);
+            QString content = in.readAll();
+            editor->setPlainText(content);
+            file.close();
+            currentFilePath = defaultFilePath;
+        } else {
+            QMessageBox::critical(this, "错误", "无法打开默认文件");
+        }
+    } else {
+        QMessageBox::information(this, "提示", "默认文件不存在，将创建一个新文件。");
+    }   
 }
