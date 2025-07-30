@@ -26,19 +26,29 @@ find_package(Qt6 REQUIRED COMPONENTS
 # 源文件
 set(PROJECT_SOURCES
     src/main.cpp
-    src/MainWindow.h
     src/MainWindow.cpp
-    src/document.h
-    src/document.cpp
+    src/MainWindow.h
+    src/Toolbar.cpp
+    src/Toolbar.h
+    src/MarkdownRenderer.cpp
+    src/MarkdownRenderer.h
 )
 
 # 资源文件
 qt_add_resources(PROJECT_RESOURCES
-    resources.qrc
+    res/icons/icons.qrc
 )
+
+configure_file(res/default.md ${CMAKE_BINARY_DIR}/res/default.md COPYONLY)
 
 # 可执行文件
 qt_add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${PROJECT_SOURCES} ${PROJECT_RESOURCES})
+
+set(CMARK_ROOT "D:/SDK/cmark-0.31.1")
+find_library(CMARK_LIB cmark PATHS ${CMARK_ROOT}/lib REQUIRED)
+find_path   (CMARK_INC cmark.h  PATHS ${CMARK_ROOT}/include REQUIRED)
+
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMARK_INC})
 
 # 链接
 target_link_libraries(${PROJECT_NAME} PRIVATE
@@ -47,6 +57,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Widgets
     Qt6::WebEngineWidgets
     Qt6::WebChannel
+    ${CMARK_LIB}
 )
 
 # 安装规则

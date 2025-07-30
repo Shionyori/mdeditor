@@ -1,55 +1,168 @@
+// src/MainWindow.cpp
 #include "MainWindow.h"
-#include <QDockWidget>
-#include <QFile>
-#include <QUrl>
-#include <QApplication>
-#include <QDebug>
+#include "MarkdownRenderer.h"
+#include "Toolbar.h"
+#include <QSplitter>
+#include <QBoxLayout>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    // 创建编辑区域
-    editor = new QPlainTextEdit(this);
-    setCentralWidget(editor);
+setStyleSheet(
+    "QWidget { background-color: #e8e8fa; color: #333333; }"
+    "QToolBar { background-color: #d8d8f8; border: none; }"
+    "QMenuBar { background-color: #e8e8fa; }"
+    "QMenuBar::item { color: #333333; }"
+    "QMenuBar::item:hover, QMenuBar::item:selected { background-color: #b8b8d8; }"
+    "QMenu { background-color: rgba(232, 232, 250, 192); border: 1px solid #b8b8d8;}"
+    "QMenu::item { color: #333333; }"
+    "QMenu::item:hover, QMenu::item:selected { background-color: #b8b8d8; }"
+    "QPushButton { background-color: #d8d8f8; border: none; padding: 2px; border-radius: 2px; }"
+    "QPushButton:hover { background-color: #b8b8d8; }"
+    "QPushButton:pressed { background-color: #a8a8c8; }"
+);
 
-    // 创建预览区域
+
+    // 创建编辑器和预览窗口
+    editor = new QTextEdit(this);
     preview = new QWebEngineView(this);
-    dock = new QDockWidget("Preview", this);
-    dock->setWidget(preview);
-    addDockWidget(Qt::RightDockWidgetArea, dock);
 
-    // 加载默认 Markdown 文件
-    QFile defaultTextFile(":/res/default.md");
-    if (defaultTextFile.open(QIODevice::ReadOnly)) {
-        editor->setPlainText(defaultTextFile.readAll());
-        defaultTextFile.close();
+    // 创建水平分割器
+    QSplitter* splitter = new QSplitter(Qt::Horizontal, this);
+    splitter->addWidget(editor);
+    splitter->addWidget(preview);
+    splitter->setSizes({300, 600});
+
+    // 设置主窗口的中心部件
+    setCentralWidget(splitter);
+
+    // 监听编辑器内容变化
+    connect(editor, &QTextEdit::textChanged, this, &MainWindow::updatePreview);
+
+    // 创建动作
+    createActions();
+    // 创建菜单
+    createMenus();
+    // 创建工具栏
+    createToolBars();
+
+    // 指定默认文件的绝对路径
+    QString defaultFilePath = QDir::currentPath() + "/res/default.md";
+    if (QFile::exists(defaultFilePath)) {
+        QFile file(defaultFilePath);
+        if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QTextStream in(&file);
+            QString content = in.readAll();
+            editor->setPlainText(content);
+            file.close();
+            currentFilePath = defaultFilePath;
+        } else {
+            QMessageBox::critical(this, "错误", "无法打开默认文件");
+        }
     } else {
-        qDebug() << "Failed to load default.md file.";
+        QMessageBox::information(this, "提示", "默认文件不存在，将创建一个新文件。");
     }
-
-    QFile file(":/res/default.md");
-    if (file.exists()) {
-        qDebug() << "Resource file exists:" << file.fileName();
-    } else {
-        qDebug() << "Resource file does not exist:" << file.fileName();
-    }
-
-    // 初始化 QWebChannel
-    channel = new QWebChannel(this);
-    content = new Document(this);
-    channel->registerObject(QStringLiteral("content"), content);
-    preview->page()->setWebChannel(channel);
-
-    // 加载预览页面
-    QUrl url("qrc:/res/index.html");
-    qDebug() << "Loading URL:" << url;
-    preview->setUrl(url);
-
-    // 连接编辑区域的文本变化信号
-    connect(editor, &QPlainTextEdit::textChanged, this, &MainWindow::updateContent);
 }
 
-void MainWindow::updateContent()
+void MainWindow::updatePreview()
 {
-    content->setText(editor->toPlainText());
+    QString markdownText = editor->toPlainText();
+    QString htmlText = MarkdownRenderer::markdownToHtml(markdownText);
+    preview->setHtml(htmlText);
+}
+
+void MainWindow::newFile()
+{
+    editor->clear();
+    currentFilePath.clear();
+}
+
+void MainWindow::openFile()
+{
+    QString filePath = QFileDialog::getOpenFileName(this, "打开 Markdown 文件", "", "Markdown 文件 (*.md);;所有文件 (*)");
+    if (!filePath.isEmpty())
+    {
+        QFile file(filePath);
+        if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            QTextStream in(&file);
+            QString content = in.readAll();
+            editor->setPlainText(content);
+            file.close();
+            currentFilePath = filePath;
+        }
+        else
+        {
+            QMessageBox::critical(this, "错误", "无法打开文件");
+        }
+    }
+}
+
+void MainWindow::saveFile()
+{
+    QString filePath = currentFilePath.isEmpty() ? QFileDialog::getSaveFileName(this, "保存 Markdown 文件", "", "Markdown 文件 (*.md);;所有文件 (*)") : currentFilePath;
+    if (!filePath.isEmpty())
+    {
+        QFile file(filePath);
+        if (file.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+            QTextStream out(&file);
+            out << editor->toPlainText();
+            file.close();
+            currentFilePath = filePath;
+        }
+        else
+        {
+            QMessageBox::critical(this, "错误", "无法保存文件");
+        }
+    }
+}
+
+void MainWindow::saveAs()
+{
+    QString f = QFileDialog::getSaveFileName(this, "Save As", "", "Markdown (*.md)");
+    if (!f.isEmpty()) {
+        currentFilePath = f;
+        saveFile();
+    }
+}
+
+void MainWindow::createActions()
+{
+    newAction = new QAction("新建", this);
+    newAction->setShortcut(QKeySequence("Ctrl+N"));
+    connect(newAction, &QAction::triggered, this, &MainWindow::newFile);
+
+    openAction = new QAction("打开", this);
+    openAction->setShortcut(QKeySequence("Ctrl+O"));
+    connect(openAction, &QAction::triggered, this, &MainWindow::openFile);
+
+    saveAction = new QAction("保存", this);
+    saveAction->setShortcut(QKeySequence("Ctrl+S"));
+    connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
+
+    saveAsAction = new QAction("另存为", this);
+    saveAsAction->setShortcut(QKeySequence("Ctrl+Shift+S"));
+    connect(saveAsAction, &QAction::triggered, this, &MainWindow::saveAs);
+}
+
+void MainWindow::createMenus()
+{
+    QMenuBar* menuBar = new QMenuBar(this);
+    setMenuBar(menuBar);
+
+    QMenu* fileMenu = menuBar->addMenu("文件");
+    fileMenu->addAction(newAction);
+    fileMenu->addSeparator();
+    fileMenu->addAction(openAction);
+    fileMenu->addSeparator();
+    fileMenu->addAction(saveAction);
+    fileMenu->addSeparator();
+    fileMenu->addAction(saveAsAction);
+}
+
+void MainWindow::createToolBars()
+{
+    QToolBar* toolbar = addToolBar("Markdown");
+    toolbar->addWidget(new Toolbar(editor));
 }
