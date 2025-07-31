@@ -5,20 +5,16 @@
 #include <QFileDialog>
 #include <QFile>
 #include <QTextStream>
+#include <QSettings>
 
 ViewPage::ViewPage(QWidget *parent)
     : QMainWindow(parent)
 {
-    qDebug() << "ViewPage constructed";
     initUI();
     createDockWidgets();
     connectSignals();
     loadDefaultDocument();
-}
-
-ViewPage::~ViewPage()
-{
-    qDebug() << "ViewPage destructed";
+    restoreLayout();
 }
 
 void ViewPage::initUI()
@@ -35,24 +31,25 @@ void ViewPage::initUI()
 
 void ViewPage::createDockWidgets()
 {
-    QDockWidget* editorDock = new QDockWidget("编辑器", this);
+    editorDock = new QDockWidget("编辑器", this);
     editorDock->setWidget(editor);
     editorDock->setObjectName("EditorDock");
-    editorDock->setFeatures(QDockWidget::DockWidgetMovable);
+    editorDock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetClosable);
     addDockWidget(Qt::LeftDockWidgetArea, editorDock);
 
-    QDockWidget* previewDock = new QDockWidget("预览", this);
+    previewDock = new QDockWidget("预览", this);
     previewDock->setWidget(preview);
     previewDock->setObjectName("PreviewDock");
-    previewDock->setFeatures(QDockWidget::DockWidgetMovable);
+    previewDock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetClosable);
     addDockWidget(Qt::RightDockWidgetArea, previewDock);
 
-    setDockOptions(QMainWindow::AllowTabbedDocks);
+    setDockOptions(QMainWindow::AllowNestedDocks);
     splitDockWidget(editorDock, previewDock, Qt::Horizontal);
+
     resizeDocks({editorDock, previewDock}, {1, 2}, Qt::Horizontal);
 
-    editorDock->setMinimumSize(300, 225);
-    previewDock->setMinimumSize(300, 225);
+    editorDock->setMinimumSize(250, 225);
+    previewDock->setMinimumSize(750, 225);
 }
 
 void ViewPage::connectSignals()
@@ -95,4 +92,13 @@ void ViewPage::saveFile()
 void ViewPage::saveAs()
 {
     editor->saveAs();
+}
+
+void ViewPage::restoreLayout()
+{
+    QSettings settings("ShionLyrics", "Mdeditor");
+    QByteArray state = settings.value("viewPageState").toByteArray();
+    if (!state.isEmpty()) {
+        restoreState(state);
+    }
 }

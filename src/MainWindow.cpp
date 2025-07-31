@@ -44,8 +44,7 @@ MainWindow::MainWindow(QWidget *parent)
     // 设置主窗口的中央部件
     setCentralWidget(stackedWidget);
 
-    // 确保主窗口的大小不为零
-    resize(800, 600);
+    restoreLayout(); // 恢复布局
 }
 
 void MainWindow::newFile()
@@ -134,4 +133,21 @@ void MainWindow::createMenuBar()
     connect(openAction, &QAction::triggered, this, &MainWindow::openFile);
     connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
     connect(saveAsAction, &QAction::triggered, this, &MainWindow::saveAsFile);
+}
+
+void MainWindow::restoreLayout()
+{
+    QSettings settings("ShionLyrics", "Mdeditor");
+    QByteArray state = settings.value("mainWindowState").toByteArray();
+    if (!state.isEmpty()) {
+        restoreState(state);
+    }
+}
+
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+    QSettings settings("ShionLyrics", "Mdeditor");
+    settings.setValue("mainWindowState", saveState());
+    settings.setValue("viewPageState", viewPage->saveState());
+    QMainWindow::closeEvent(event);
 }

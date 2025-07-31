@@ -9,6 +9,7 @@
 #include <QLabel>
 #include <QMenu>
 #include <QMenuBar>
+#include <QSettings>
 #include "ViewPage.h"
 #include "SettingPage.h"
 
@@ -27,6 +28,11 @@ private:
 
     QToolBar* createNavigationBar(QStackedWidget* stackedWidget);
     void createMenuBar();
+
+    void restoreLayout();
+    
+protected:
+    void closeEvent(QCloseEvent* event) override;
 
 private:
     QMenuBar* menuBar; // 菜单栏

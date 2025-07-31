@@ -12,7 +12,6 @@ class ViewPage : public QMainWindow
 
 public:
     ViewPage(QWidget *parent = nullptr);
-    ~ViewPage();
 
 public slots:
     void newFile();
@@ -25,10 +24,14 @@ private:
     Preview* preview;
     Toolbar* toolbar;
 
+    QDockWidget* editorDock;
+    QDockWidget* previewDock;
+
     void initUI();
     void createDockWidgets();
     void connectSignals();
     void loadDefaultDocument();
+    void restoreLayout();
 };
 
 #endif // VIEWPAGE_H
