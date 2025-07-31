@@ -1,103 +1,137 @@
-// src/MainWindow.cpp
 #include "MainWindow.h"
-#include "MarkdownRenderer.h"
-#include <QSplitter>
-#include <QMessageBox>
-#include <QFileDialog>
-#include <QFile>
-#include <QTextStream>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
+    // 设置样式表
     setStyleSheet(
         "QWidget { background-color: #e8e8fa; color: #333333; }"
         "QToolBar { background-color: #c9c9ff; border: none; }"
-        "QMenuBar { background-color: #acacfa; }"
-        "QMenuBar::item { color: #333333; }"
-        "QMenuBar::item:hover, QMenuBar::item:selected { background-color: #7b7bdb; }"
-        "QMenu { background-color: rgba(232, 232, 250, 192); border: 1px solid #7b7bdb;}"
-        "QMenu::item { color: #333333; }"
-        "QMenu::item:hover, QMenu::item:selected { background-color: #7b7bdb; }"
-        "QPushButton { background-color: #c9c9ff; border: none; padding: 2px; border-radius: 2px; }"
+        "QLabel { color: #333333; }"
+        "QPushButton { background-color: #c9c9ff; border: none; padding: 10px; }"
         "QPushButton:hover { background-color: #adadd7; }"
         "QPushButton:pressed { background-color: #a4a4cd; }"
+        "QMenuBar { background-color: #9898fc; }"
+        "QMenuBar::item { color: #333333; }"
+        "QMenuBar::item:hover, QMenuBar::item:selected { background-color: #7b7bdb; }"
+        "QMenu { background-color: rgba(232, 232, 250, 192); border: 1px solid #7b7bdb; }"
+        "QMenu::item { color: #333333; }"
+        "QMenu::item:hover, QMenu::item:selected { background-color: #7b7bdb; }"
     );
 
+    // 设置窗口图标
     QIcon icon(":/icons/app_icon.png");
     setWindowIcon(icon);
 
-    initUI();
-    createDockWidgets();
-    connectSignals();
+    // 初始化成员变量
+    viewPage = new ViewPage(this);
+    settingPage = new SettingPage(this);
 
-    loadDefaultDocument();
+    // 创建 QStackedWidget
+    QStackedWidget* stackedWidget = new QStackedWidget(this);
+    stackedWidget->addWidget(viewPage);
+    stackedWidget->addWidget(settingPage);
+
+    // 创建导航栏
+    QToolBar* navigationBar = createNavigationBar(stackedWidget);
+
+    // 添加导航栏到主窗口的左侧
+    addToolBar(Qt::LeftToolBarArea, navigationBar);
+
+    // 创建菜单栏
+    createMenuBar();
+
+    // 设置主窗口的中央部件
+    setCentralWidget(stackedWidget);
+
+    // 确保主窗口的大小不为零
+    resize(800, 600);
 }
 
-void MainWindow::initUI()
+void MainWindow::newFile()
 {
-    editor = new Editor(this);
-    preview = new Preview(editor, this);
-
-    toolbar = new Toolbar(editor, this);
-    toolbar->setObjectName("Toolbar");
-    toolbar->setWindowTitle("工具栏");
-
-    menu = new Menu(this);
-
-    addToolBar(toolbar);
-    setMenuBar(menu->getMenuBar());
+    viewPage->newFile();
 }
 
-void MainWindow::createDockWidgets()
+void MainWindow::openFile()
 {
-    QDockWidget* editorDock = new QDockWidget("编辑器", this);
-    editorDock->setWidget(editor);
-    editorDock->setObjectName("EditorDock");
-    editorDock->setFeatures(QDockWidget::DockWidgetMovable);
-    addDockWidget(Qt::LeftDockWidgetArea, editorDock);
-
-    QDockWidget* previewDock = new QDockWidget("预览", this);
-    previewDock->setWidget(preview);
-    previewDock->setObjectName("PreviewDock");
-    previewDock->setFeatures(QDockWidget::DockWidgetMovable);
-    addDockWidget(Qt::RightDockWidgetArea, previewDock);
-
-    // 设置窗口堆叠属性
-    setDockOptions(QMainWindow::AllowNestedDocks);
-    editorDock->setFeatures(QDockWidget::DockWidgetMovable); // 禁用浮动
-    previewDock->setFeatures(QDockWidget::DockWidgetMovable); // 禁用浮动
-
-    // 设置默认停靠关系
-    splitDockWidget(editorDock, previewDock, Qt::Horizontal);
-    resizeDocks({editorDock, previewDock}, {1, 2}, Qt::Horizontal); // 设置初始比例
-
-    editorDock->setMinimumSize(200, 150);
-    previewDock->setMinimumSize(200, 150);
+    viewPage->openFile();
 }
 
-void MainWindow::connectSignals()
+void MainWindow::saveFile()
 {
-    connect(editor, &QTextEdit::textChanged, preview, &Preview::updatePreview);
-    connect(menu->getNewAction(), &QAction::triggered, editor, &Editor::newFile);
-    connect(menu->getOpenAction(), &QAction::triggered, editor, &Editor::openFile);
-    connect(menu->getSaveAction(), &QAction::triggered, editor, &Editor::saveFile);
-    connect(menu->getSaveAsAction(), &QAction::triggered, editor, &Editor::saveAs);
+    viewPage->saveFile();
 }
 
-void MainWindow::loadDefaultDocument()
+void MainWindow::saveAsFile()
 {
-    QString defaultFilePath = QString(QDir::currentPath() + "/res/default.md"); // 假设默认文档在资源文件中
-    QFile file(defaultFilePath);
-    if (file.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        QTextStream in(&file);
-        QString content = in.readAll();
-        editor->setPlainText(content);
-        file.close();
-    }
-    else
-    {
-        QMessageBox::critical(this, "错误", "无法加载默认文档");
-    }
+    viewPage->saveAs();
+}
+
+// 创建导航栏
+QToolBar* MainWindow::createNavigationBar(QStackedWidget* stackedWidget)
+{
+    QToolBar* navigationBar = new QToolBar(this);
+    navigationBar->setOrientation(Qt::Vertical);
+    navigationBar->setFloatable(false);
+    navigationBar->setMovable(false);
+    navigationBar->setStyleSheet("QToolBar { background-color: #acacfa; border: none; }");
+
+    // 添加导航按钮
+    QPushButton* viewPageButton = new QPushButton(this);
+    viewPageButton->setIcon(QIcon(":/icons/view_icon.png"));
+    viewPageButton->setIconSize(QSize(30, 30));
+    viewPageButton->setStyleSheet("QPushButton { background-color: #c9c9ff; }");
+
+    QPushButton* settingPageButton = new QPushButton(this);
+    settingPageButton->setIcon(QIcon(":/icons/setting_icon.png"));
+    settingPageButton->setIconSize(QSize(30, 30));
+    settingPageButton->setStyleSheet(
+        "QPushButton { background-color: #acacfa; }"
+        "QPushButton:hover { background-color: #d9d9f3; }");
+
+    navigationBar->addWidget(viewPageButton);
+    navigationBar->addWidget(settingPageButton);
+
+    // 连接按钮信号到槽
+    connect(viewPageButton, &QPushButton::clicked, [this, viewPageButton, settingPageButton, stackedWidget]() {
+        stackedWidget->setCurrentIndex(0);
+        viewPageButton->setStyleSheet("QPushButton { background-color: #c9c9ff; }");
+        settingPageButton->setStyleSheet(
+            "QPushButton { background-color: #acacfa; }"
+            "QPushButton:hover { background-color: #d9d9f3; }");
+    });
+
+    connect(settingPageButton, &QPushButton::clicked, [this, viewPageButton, settingPageButton, stackedWidget]() {
+        stackedWidget->setCurrentIndex(1);
+        settingPageButton->setStyleSheet("QPushButton { background-color: #c9c9ff; }");
+        viewPageButton->setStyleSheet(
+            "QPushButton { background-color: #acacfa; }"
+            "QPushButton:hover { background-color: #d9d9f3; }");
+    });
+
+    return navigationBar;
+}
+
+// 创建菜单栏
+void MainWindow::createMenuBar()
+{
+    QMenuBar* menuBar = new QMenuBar(this);
+    QMenu* fileMenu = menuBar->addMenu(tr("文件"));
+    QAction* newAction = fileMenu->addAction(tr("新建"));
+    newAction->setShortcut(QKeySequence("Ctrl+N"));
+    QAction* openAction = fileMenu->addAction(tr("打开"));
+    openAction->setShortcut(QKeySequence("Ctrl+O"));
+    QAction* saveAction = fileMenu->addAction(tr("保存"));
+    saveAction->setShortcut(QKeySequence("Ctrl+S"));
+    QAction* saveAsAction = fileMenu->addAction(tr("另存为"));
+    saveAsAction->setShortcut(QKeySequence("Ctrl+Shift+S"));
+
+    setMenuBar(menuBar);
+
+    // 连接菜单项信号到槽
+    connect(newAction, &QAction::triggered, this, &MainWindow::newFile);
+    connect(openAction, &QAction::triggered, this, &MainWindow::openFile);
+    connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
+    connect(saveAsAction, &QAction::triggered, this, &MainWindow::saveAsFile);
 }

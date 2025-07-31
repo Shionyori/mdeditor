@@ -36,8 +36,10 @@ set(PROJECT_SOURCES
     src/Editor.h
     src/Preview.cpp
     src/Preview.h
-    src/Menu.cpp
-    src/Menu.h
+    src/ViewPage.cpp
+    src/ViewPage.h
+    src/SettingPage.cpp
+    src/SettingPage.h
 )
 
 # 资源文件

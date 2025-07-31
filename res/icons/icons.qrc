@@ -3,5 +3,7 @@
         <file>bold.png</file>
         <file>italic.png</file>
         <file>app_icon.png</file>
+        <file>view_icon.png</file>
+        <file>setting_icon.png</file>        
     </qresource>
 </RCC>

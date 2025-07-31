@@ -8,7 +8,7 @@ int main(int argc, char* argv[])
 
     MainWindow w;
     w.setWindowTitle("MdEditor");
-    w.resize(800, 600);
+    w.resize(1200, 900);
     w.show();
 
     return app.exec();

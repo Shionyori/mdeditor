@@ -1,16 +1,16 @@
-// src/MainWindow.h
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QTextEdit>
-#include <QWebEngineView>
-#include <QDockWidget>
-#include <QAction>
-#include "Editor.h"
-#include "Preview.h"
-#include "Toolbar.h"
-#include "Menu.h"
+#include <QStackedWidget>
+#include <QToolBar>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QMenu>
+#include <QMenuBar>
+#include "ViewPage.h"
+#include "SettingPage.h"
 
 class MainWindow : public QMainWindow
 {
@@ -20,15 +20,24 @@ public:
     MainWindow(QWidget *parent = nullptr);
 
 private:
-    Editor* editor;
-    Preview* preview;
-    Toolbar* toolbar;
-    Menu* menu;
+    void newFile();
+    void openFile();
+    void saveFile();
+    void saveAsFile();
 
-    void initUI();
-    void createDockWidgets();
-    void connectSignals();
-    void loadDefaultDocument();
+    QToolBar* createNavigationBar(QStackedWidget* stackedWidget);
+    void createMenuBar();
+
+private:
+    QMenuBar* menuBar; // 菜单栏
+    QMenu* fileMenu;   // 菜单
+    QAction* newAction; // 新建操作
+    QAction* openAction; // 打开操作
+    QAction* saveAction; // 保存操作
+    QAction* saveAsAction; // 另存为操作
+
+    ViewPage* viewPage;
+    SettingPage* settingPage;
 };
 
 #endif // MAINWINDOW_H
