@@ -5,17 +5,12 @@
 #include <QMainWindow>
 #include <QTextEdit>
 #include <QWebEngineView>
-#include <QToolBar>
-#include <QMenuBar>
+#include <QDockWidget>
 #include <QAction>
-#include <QFileDialog>
-#include <QFile>
-#include <QMessageBox>
-#include <QSplitter>
-#include <QMouseEvent>
-#include <QPushButton>
-#include <QBoxLayout>
-#include <QToolBar>
+#include "Editor.h"
+#include "Preview.h"
+#include "Toolbar.h"
+#include "Menu.h"
 
 class MainWindow : public QMainWindow
 {
@@ -24,27 +19,16 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
 
-private slots:
-    void updatePreview();
-    void newFile();
-    void openFile();
-    void saveFile();
-    void saveAs();
-
 private:
-    QTextEdit* editor;
-    QWebEngineView* preview;
-    QString currentFilePath;
+    Editor* editor;
+    Preview* preview;
+    Toolbar* toolbar;
+    Menu* menu;
 
-    QAction* openAction;
-    QAction* saveAction; 
-    QAction* newAction;     
-    QAction* saveAsAction;  
-    QAction* aboutAction;       
-
-    void createActions();
-    void createMenus();
-    void initDefaultFile(QString defaultFilePath);
+    void initUI();
+    void createDockWidgets();
+    void connectSignals();
+    void loadDefaultDocument();
 };
 
 #endif // MAINWINDOW_H

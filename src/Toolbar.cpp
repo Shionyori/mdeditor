@@ -3,31 +3,27 @@
 #include <QStyle>
 
 Toolbar::Toolbar(QTextEdit* editor, QWidget *parent)
-    : QWidget(parent), editor(editor)
+    : QToolBar(parent), editor(editor)
 {
-    // 统一创建函数
+
     auto mkBtn = [this](const QString &icon, const QKeySequence &ks) -> QPushButton* {
         QPushButton *btn = new QPushButton(this);
         btn->setIcon(QIcon(icon));
-        btn->setIconSize(QSize(14, 14));               // 更小图标
-        btn->setFixedSize(24, 24);                     // 紧凑按钮
+        btn->setIconSize(QSize(16, 16)); // 设置图标大小
+        btn->setFixedSize(20, 20);       // 设置按钮大小
         btn->setShortcut(ks);
-        btn->setFlat(true);                            // 无边框
+        btn->setFlat(true);
         return btn;
     };
 
-    QPushButton *boldBtn   = mkBtn(":/icons/bold.png",   QKeySequence("Ctrl+B"));
+    QPushButton *boldBtn = mkBtn(":/icons/bold.png", QKeySequence("Ctrl+B"));
     QPushButton *italicBtn = mkBtn(":/icons/italic.png", QKeySequence("Ctrl+I"));
 
-    connect(boldBtn,   &QPushButton::clicked, this, &Toolbar::makeBold);
+    connect(boldBtn, &QPushButton::clicked, this, &Toolbar::makeBold);
     connect(italicBtn, &QPushButton::clicked, this, &Toolbar::makeItalic);
 
-    QHBoxLayout *layout = new QHBoxLayout(this);
-    layout->setContentsMargins(2, 0, 2, 0);  // 左右各 2 px 边距
-    layout->setSpacing(2);                   // 按钮之间 2 px
-    layout->addWidget(boldBtn);
-    layout->addWidget(italicBtn);
-    setLayout(layout);
+    addWidget(boldBtn);
+    addWidget(italicBtn);
 }
 
 void Toolbar::makeBold()

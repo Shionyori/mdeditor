@@ -2,12 +2,12 @@
 #ifndef TOOLBAR_H
 #define TOOLBAR_H
 
-#include <QWidget>
+#include <QToolBar>
 #include <QTextEdit>
 #include <QPushButton>
-#include <QBoxLayout>
+#include <QHBoxLayout>
 
-class Toolbar : public QWidget
+class Toolbar : public QToolBar
 {
     Q_OBJECT
 

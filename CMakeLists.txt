@@ -32,6 +32,12 @@ set(PROJECT_SOURCES
     src/Toolbar.h
     src/MarkdownRenderer.cpp
     src/MarkdownRenderer.h
+    src/Editor.cpp
+    src/Editor.h
+    src/Preview.cpp
+    src/Preview.h
+    src/Menu.cpp
+    src/Menu.h
 )
 
 # 资源文件
