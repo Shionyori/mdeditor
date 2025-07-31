@@ -2,5 +2,6 @@
     <qresource prefix="/icons">
         <file>bold.png</file>
         <file>italic.png</file>
+        <file>app_icon.png</file>
     </qresource>
 </RCC>

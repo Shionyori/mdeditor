@@ -23,6 +23,10 @@ setStyleSheet(
     "QPushButton:pressed { background-color: #a4a4cd; }"
 );
 
+    // 设置窗口图标
+    QIcon icon(":/icons/app_icon.png"); 
+    setWindowIcon(icon);
+
     // 创建编辑器和预览窗口
     editor = new QTextEdit(this);
     preview = new QWebEngineView(this);
