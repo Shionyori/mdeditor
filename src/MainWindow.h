@@ -11,6 +11,7 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QSettings>
+#include <QStatusBar>
 #include "component/Menubar.h"
 #include "view/ViewPage.h"
 #include "view/FavoritePage.h"
@@ -25,6 +26,7 @@ public:
 
 private:
     QToolBar* createNavigationBar(QStackedWidget* stackedWidget);
+    QStatusBar* createStatusBar();
     void restoreLayout();
     
 protected:

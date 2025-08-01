@@ -56,7 +56,8 @@ configure_file(res/default.md ${CMAKE_BINARY_DIR}/res/default.md COPYONLY)
 # 可执行文件
 qt_add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${PROJECT_SOURCES} ${PROJECT_RESOURCES})
 
-set(CMARK_ROOT "D:/SDK/cmark-0.31.1")
+# 在此处设置cmark库路径
+set(CMARK_ROOT "${CMAKE_SOURCE_DIR}/3rdparty/cmark-0.31.1")
 find_library(CMARK_LIB cmark PATHS ${CMARK_ROOT}/lib REQUIRED)
 find_path   (CMARK_INC cmark.h  PATHS ${CMARK_ROOT}/include REQUIRED)
 

@@ -2,9 +2,12 @@
     <qresource prefix="/icons">
         <file>bold.png</file>
         <file>italic.png</file>
+        <file>title.png</file>
+        <file>underline.png</file>
         <file>app_icon.png</file>
         <file>view_icon.png</file>
         <file>favorite_icon.png</file>
-        <file>setting_icon.png</file>          
+        <file>setting_icon.png</file> 
+        <file>under_construction.png</file>
     </qresource>
 </RCC>

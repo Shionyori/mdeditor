@@ -7,7 +7,7 @@ Menubar::Menubar(ViewPage* viewPage ,QWidget* parent)
     
     setStyleSheet(
         "QMenuBar { background-color: #9898fc; }"
-        "QMenuBar::item { color: #333333; width: 80px; height: 30px; padding: 10px 15px; }"
+        "QMenuBar::item { color: #333333; width: 80px; height: 30px; padding: 8px 15px; }"
         "QMenuBar::item:hover, QMenuBar::item:selected { background-color: #7b7bdb; }"
         "QMenu { background-color: rgba(232, 232, 250, 192); border: 1px solid #7b7bdb; }"
         "QMenu::item { color: #333333; }"

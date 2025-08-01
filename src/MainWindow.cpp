@@ -33,13 +33,15 @@ MainWindow::MainWindow(QWidget *parent)
 
     // 创建导航栏
     QToolBar* navigationBar = createNavigationBar(stackedWidget);
-
-    // 添加导航栏到主窗口的左侧
     addToolBar(Qt::LeftToolBarArea, navigationBar);
 
     // 创建菜单栏
     menubar = new Menubar(viewPage, this);
     setMenuBar(menubar);
+
+    // 创建状态栏
+    QStatusBar* stbar = createStatusBar();
+    setStatusBar(stbar);
 
     // 设置主窗口的中央部件
     setCentralWidget(stackedWidget);
@@ -109,6 +111,23 @@ QToolBar* MainWindow::createNavigationBar(QStackedWidget* stackedWidget)
         firstBtn->setChecked(true);
 
     return navigationBar;
+}
+
+QStatusBar* MainWindow::createStatusBar()
+{
+    QStatusBar* stbar = new QStatusBar;
+    QLabel* AppInfo = new QLabel(" MdEditor ");
+    stbar->addPermanentWidget(AppInfo);
+
+    QLabel* AuthorInfo = new QLabel(" Made by Shionyori ");
+    stbar->addPermanentWidget(AuthorInfo);
+
+    stbar->setStyleSheet(
+        "QStatusBar { background-color: #babaf7; color: #333333; }"
+        "QLabel { background-color: #babaf7; color: #333333;}"
+        "QWidget { background-color: #babaf7; color: #333333; }"
+    );
+    return stbar;
 }
 
 void MainWindow::restoreLayout()

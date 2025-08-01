@@ -8,8 +8,8 @@ Toolbar::Toolbar(QTextEdit* editor, QWidget *parent)
     auto mkBtn = [this](const QString &icon, const QKeySequence &ks) -> QPushButton* {
         QPushButton *btn = new QPushButton(this);
         btn->setIcon(QIcon(icon));
-        btn->setIconSize(QSize(16, 16)); // 设置图标大小
-        btn->setFixedSize(20, 20);       // 设置按钮大小
+        btn->setIconSize(QSize(15, 15));
+        btn->setFixedSize(25, 25);       
         btn->setShortcut(ks);
         btn->setFlat(true);
         return btn;
@@ -17,12 +17,18 @@ Toolbar::Toolbar(QTextEdit* editor, QWidget *parent)
 
     QPushButton *boldBtn = mkBtn(":/icons/bold.png", QKeySequence("Ctrl+B"));
     QPushButton *italicBtn = mkBtn(":/icons/italic.png", QKeySequence("Ctrl+I"));
+    QPushButton *titleBtn = mkBtn(":/icons/title.png", QKeySequence("Ctrl+T"));
+    QPushButton *underlineBtn = mkBtn(":/icons/underline.png", QKeySequence("Ctrl+U"));
 
     connect(boldBtn, &QPushButton::clicked, this, &Toolbar::makeBold);
     connect(italicBtn, &QPushButton::clicked, this, &Toolbar::makeItalic);
+    connect(titleBtn, &QPushButton::clicked, this, &Toolbar::makeTitle);
+    connect(underlineBtn, &QPushButton::clicked, this, &Toolbar::makeUnderline);
 
     addWidget(boldBtn);
     addWidget(italicBtn);
+    addWidget(titleBtn);
+    addWidget(underlineBtn);
 }
 
 void Toolbar::makeBold()
@@ -55,4 +61,24 @@ void Toolbar::makeItalic()
         cursor.movePosition(QTextCursor::Left);
         editor->setTextCursor(cursor);
     }
+}
+
+void Toolbar::makeTitle()
+{
+    QTextCursor cursor = editor->textCursor();
+    QString selectedText = cursor.selectedText();
+    if (!selectedText.isEmpty())
+        cursor.insertText("# " + selectedText);
+    else
+        cursor.insertText("# ");
+}
+
+void Toolbar::makeUnderline()
+{
+    QTextCursor cursor = editor->textCursor();
+    QString selectedText = cursor.selectedText();
+    if (!selectedText.isEmpty())
+        cursor.insertText("`" + selectedText + "`");
+    else
+        cursor.insertText("`");
 }

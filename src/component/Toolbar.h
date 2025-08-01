@@ -18,6 +18,8 @@ public:
 private slots:
     void makeBold();
     void makeItalic();
+    void makeTitle();
+    void makeUnderline();
 
 private:
     QTextEdit* editor;

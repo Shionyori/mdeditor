@@ -17,6 +17,9 @@ public:
 
 private:
     Editor* editor;
-};
+    QTimer* resizeTimer;
 
+protected:
+    void resizeEvent(QResizeEvent* event) override;
+};
 #endif // PREVIEW_H

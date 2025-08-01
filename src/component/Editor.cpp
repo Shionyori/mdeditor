@@ -4,6 +4,7 @@
 Editor::Editor(QWidget *parent)
     : QTextEdit(parent)
 {
+    setFrameShape(QFrame::NoFrame);
 }
 
 void Editor::newFile()
