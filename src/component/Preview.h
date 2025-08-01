@@ -3,6 +3,8 @@
 #define PREVIEW_H
 
 #include <QWebEngineView>
+#include <QDir>
+#include <QApplication>
 #include "Editor.h"
 
 class Preview : public QWebEngineView
@@ -14,7 +16,7 @@ public:
     void updatePreview();
 
 private:
-    Editor* editor; // 保存 Editor 对象的指针
+    Editor* editor;
 };
 
 #endif // PREVIEW_H

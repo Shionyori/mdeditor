@@ -1,6 +1,6 @@
 // src/Preview.cpp
 #include "Preview.h"
-#include "MarkdownRenderer.h"
+#include "../utils/MarkdownRenderer.h"
 
 Preview::Preview(Editor* editor, QWidget *parent)
     : QWebEngineView(parent), editor(editor)
@@ -9,7 +9,9 @@ Preview::Preview(Editor* editor, QWidget *parent)
 
 void Preview::updatePreview()
 {
-    QString markdownText = editor->toPlainText(); // 使用保存的 editor 对象
+    QString markdownText = editor->toPlainText();
     QString htmlText = MarkdownRenderer::markdownToHtml(markdownText);
-    setHtml(htmlText);
+
+    QDir imgDir(QApplication::applicationDirPath());
+    setHtml(htmlText, QUrl::fromLocalFile(imgDir.absolutePath() + "/"));
 }

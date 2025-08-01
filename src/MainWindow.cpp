@@ -1,4 +1,7 @@
+// src/MainWindow.cpp
 #include "MainWindow.h"
+#include <QOverload>
+#include <QButtonGroup>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -11,12 +14,6 @@ MainWindow::MainWindow(QWidget *parent)
         "QPushButton { background-color: #c9c9ff; border: none; padding: 10px; }"
         "QPushButton:hover { background-color: #adadd7; }"
         "QPushButton:pressed { background-color: #a4a4cd; }"
-        "QMenuBar { background-color: #9898fc; }"
-        "QMenuBar::item { color: #333333; }"
-        "QMenuBar::item:hover, QMenuBar::item:selected { background-color: #7b7bdb; }"
-        "QMenu { background-color: rgba(232, 232, 250, 192); border: 1px solid #7b7bdb; }"
-        "QMenu::item { color: #333333; }"
-        "QMenu::item:hover, QMenu::item:selected { background-color: #7b7bdb; }"
     );
 
     // 设置窗口图标
@@ -25,11 +22,13 @@ MainWindow::MainWindow(QWidget *parent)
 
     // 初始化成员变量
     viewPage = new ViewPage(this);
+    favoritePage = new FavoritePage(this);
     settingPage = new SettingPage(this);
 
     // 创建 QStackedWidget
     QStackedWidget* stackedWidget = new QStackedWidget(this);
     stackedWidget->addWidget(viewPage);
+    stackedWidget->addWidget(favoritePage);
     stackedWidget->addWidget(settingPage);
 
     // 创建导航栏
@@ -39,7 +38,8 @@ MainWindow::MainWindow(QWidget *parent)
     addToolBar(Qt::LeftToolBarArea, navigationBar);
 
     // 创建菜单栏
-    createMenuBar();
+    menubar = new Menubar(viewPage, this);
+    setMenuBar(menubar);
 
     // 设置主窗口的中央部件
     setCentralWidget(stackedWidget);
@@ -47,92 +47,68 @@ MainWindow::MainWindow(QWidget *parent)
     restoreLayout(); // 恢复布局
 }
 
-void MainWindow::newFile()
-{
-    viewPage->newFile();
-}
 
-void MainWindow::openFile()
+// 描述导航页按钮
+struct NavItem
 {
-    viewPage->openFile();
-}
+    QString iconPath;
+    QString tip;
+    int targetIndex;   // 对应 QStackedWidget 的页号
+};
 
-void MainWindow::saveFile()
-{
-    viewPage->saveFile();
-}
+static const QList<NavItem> navItems = {
+    { ":/icons/view_icon.png", "视图", 0 },
+    { ":/icons/favorite_icon.png", "收藏", 1 },
+    { ":/icons/setting_icon.png", "设置", 2 },
+};
 
-void MainWindow::saveAsFile()
-{
-    viewPage->saveAs();
-}
-
-// 创建导航栏
 QToolBar* MainWindow::createNavigationBar(QStackedWidget* stackedWidget)
 {
     QToolBar* navigationBar = new QToolBar(this);
+    navigationBar->setObjectName("NavigationBar");
+    navigationBar->setWindowTitle("导航栏");
     navigationBar->setOrientation(Qt::Vertical);
     navigationBar->setFloatable(false);
     navigationBar->setMovable(false);
     navigationBar->setStyleSheet("QToolBar { background-color: #acacfa; border: none; }");
 
-    // 添加导航按钮
-    QPushButton* viewPageButton = new QPushButton(this);
-    viewPageButton->setIcon(QIcon(":/icons/view_icon.png"));
-    viewPageButton->setIconSize(QSize(30, 30));
-    viewPageButton->setStyleSheet("QPushButton { background-color: #c9c9ff; }");
+    // 互斥按钮组
+    auto* group = new QButtonGroup(navigationBar);   
+    group->setExclusive(true);
 
-    QPushButton* settingPageButton = new QPushButton(this);
-    settingPageButton->setIcon(QIcon(":/icons/setting_icon.png"));
-    settingPageButton->setIconSize(QSize(30, 30));
-    settingPageButton->setStyleSheet(
-        "QPushButton { background-color: #acacfa; }"
-        "QPushButton:hover { background-color: #d9d9f3; }");
+    for (const NavItem& item : navItems)
+    {
+        auto* btn = new QPushButton(navigationBar);
+        btn->setIcon(QIcon(item.iconPath));
+        btn->setIconSize({32, 32});
+        btn->setFixedSize({42, 52});
+        btn->setToolTip(item.tip);
+        btn->setCheckable(true);           // 允许弹起/按下
+        btn->setAutoExclusive(true);       // 互斥
+        btn->setProperty("pageIndex", item.targetIndex);
 
-    navigationBar->addWidget(viewPageButton);
-    navigationBar->addWidget(settingPageButton);
+        btn->setStyleSheet(
+            "QPushButton { border: none; background: #acacfa; padding: 6px; }"
+            "QPushButton:hover:!checked { background: #d9d9f3; }"
+            "QPushButton:checked { background: #c9c9ff; }"
+        );
 
-    // 连接按钮信号到槽
-    connect(viewPageButton, &QPushButton::clicked, [this, viewPageButton, settingPageButton, stackedWidget]() {
-        stackedWidget->setCurrentIndex(0);
-        viewPageButton->setStyleSheet("QPushButton { background-color: #c9c9ff; }");
-        settingPageButton->setStyleSheet(
-            "QPushButton { background-color: #acacfa; }"
-            "QPushButton:hover { background-color: #d9d9f3; }");
+        navigationBar->addWidget(btn);
+        group->addButton(btn);
+    }
+
+    connect(group, QOverload<QAbstractButton*>::of(&QButtonGroup::buttonClicked),
+            [stackedWidget](QAbstractButton* btn)
+    {
+        int idx = btn->property("pageIndex").toInt();
+        stackedWidget->setCurrentIndex(idx);
     });
 
-    connect(settingPageButton, &QPushButton::clicked, [this, viewPageButton, settingPageButton, stackedWidget]() {
-        stackedWidget->setCurrentIndex(1);
-        settingPageButton->setStyleSheet("QPushButton { background-color: #c9c9ff; }");
-        viewPageButton->setStyleSheet(
-            "QPushButton { background-color: #acacfa; }"
-            "QPushButton:hover { background-color: #d9d9f3; }");
-    });
+    // 默认选中第0个按钮
+    if (QAbstractButton* firstBtn = group->buttons().value(0))
+        firstBtn->setChecked(true);
 
     return navigationBar;
-}
-
-// 创建菜单栏
-void MainWindow::createMenuBar()
-{
-    QMenuBar* menuBar = new QMenuBar(this);
-    QMenu* fileMenu = menuBar->addMenu(tr("文件"));
-    QAction* newAction = fileMenu->addAction(tr("新建"));
-    newAction->setShortcut(QKeySequence("Ctrl+N"));
-    QAction* openAction = fileMenu->addAction(tr("打开"));
-    openAction->setShortcut(QKeySequence("Ctrl+O"));
-    QAction* saveAction = fileMenu->addAction(tr("保存"));
-    saveAction->setShortcut(QKeySequence("Ctrl+S"));
-    QAction* saveAsAction = fileMenu->addAction(tr("另存为"));
-    saveAsAction->setShortcut(QKeySequence("Ctrl+Shift+S"));
-
-    setMenuBar(menuBar);
-
-    // 连接菜单项信号到槽
-    connect(newAction, &QAction::triggered, this, &MainWindow::newFile);
-    connect(openAction, &QAction::triggered, this, &MainWindow::openFile);
-    connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
-    connect(saveAsAction, &QAction::triggered, this, &MainWindow::saveAsFile);
 }
 
 void MainWindow::restoreLayout()

@@ -27,19 +27,23 @@ find_package(Qt6 REQUIRED COMPONENTS
 set(PROJECT_SOURCES
     src/main.cpp
     src/MainWindow.cpp
-    src/MainWindow.h
-    src/Toolbar.cpp
-    src/Toolbar.h
-    src/MarkdownRenderer.cpp
-    src/MarkdownRenderer.h
-    src/Editor.cpp
-    src/Editor.h
-    src/Preview.cpp
-    src/Preview.h
-    src/ViewPage.cpp
-    src/ViewPage.h
-    src/SettingPage.cpp
-    src/SettingPage.h
+    src/MainWindow.h    
+    src/utils/MarkdownRenderer.cpp
+    src/utils/MarkdownRenderer.h
+    src/component/Menubar.cpp
+    src/component/Menubar.h
+    src/component/Toolbar.cpp
+    src/component/Toolbar.h
+    src/component/Editor.cpp
+    src/component/Editor.h
+    src/component/Preview.cpp
+    src/component/Preview.h
+    src/view/ViewPage.cpp
+    src/view/ViewPage.h
+    src/view/FavoritePage.cpp
+    src/view/FavoritePage.h
+    src/view/SettingPage.cpp
+    src/view/SettingPage.h
 )
 
 # 资源文件

@@ -1,9 +1,5 @@
 // src/Editor.cpp
 #include "Editor.h"
-#include <QFileDialog>
-#include <QFile>
-#include <QTextStream>
-#include <QMessageBox>
 
 Editor::Editor(QWidget *parent)
     : QTextEdit(parent)

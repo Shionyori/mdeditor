@@ -1,10 +1,18 @@
+// src/ViewPage.h
 #ifndef VIEWPAGE_H
 #define VIEWPAGE_H
 
 #include <QMainWindow>
-#include "Editor.h"
-#include "Preview.h"
-#include "Toolbar.h"
+#include <QDockWidget>
+#include <QSplitter>
+#include <QMessageBox>
+#include <QFileDialog>
+#include <QFile>
+#include <QTextStream>
+#include <QSettings>
+#include "../component/Editor.h"
+#include "../component/Preview.h"
+#include "../component/Toolbar.h"
 
 class ViewPage : public QMainWindow
 {

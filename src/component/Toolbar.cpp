@@ -1,6 +1,5 @@
 // src/Toolbar.cpp
 #include "Toolbar.h"
-#include <QStyle>
 
 Toolbar::Toolbar(QTextEdit* editor, QWidget *parent)
     : QToolBar(parent), editor(editor)

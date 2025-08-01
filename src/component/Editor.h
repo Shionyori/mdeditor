@@ -5,6 +5,10 @@
 #include <QTextEdit>
 #include <QAction>
 #include <QString>
+#include <QFileDialog>
+#include <QFile>
+#include <QTextStream>
+#include <QMessageBox>
 
 class Editor : public QTextEdit
 {

@@ -1,7 +1,5 @@
-// src/Settings.cpp
+// src/SettingPage.cpp
 #include "SettingPage.h"
-#include <QVBoxLayout>
-#include <QLabel>
 
 SettingPage::SettingPage(QWidget *parent)
     : QWidget(parent)

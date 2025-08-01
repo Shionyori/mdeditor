@@ -6,6 +6,7 @@
 #include <QTextEdit>
 #include <QPushButton>
 #include <QHBoxLayout>
+#include <QStyle>
 
 class Toolbar : public QToolBar
 {

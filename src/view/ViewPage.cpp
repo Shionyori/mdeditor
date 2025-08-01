@@ -1,11 +1,5 @@
+// src/ViewPage.cpp
 #include "ViewPage.h"
-#include <QDockWidget>
-#include <QSplitter>
-#include <QMessageBox>
-#include <QFileDialog>
-#include <QFile>
-#include <QTextStream>
-#include <QSettings>
 
 ViewPage::ViewPage(QWidget *parent)
     : QMainWindow(parent)
@@ -23,7 +17,7 @@ void ViewPage::initUI()
     preview = new Preview(editor, this);
 
     toolbar = new Toolbar(editor, this);
-    toolbar->setObjectName("Toolbar");
+    toolbar->setObjectName("ToolBar");
     toolbar->setWindowTitle("工具栏");
 
     addToolBar(toolbar);

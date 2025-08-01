@@ -1,8 +1,10 @@
-// src/Settings.h
-#ifndef SETTINGS_H
-#define SETTINGS_H
+// src/SettingPage.h
+#ifndef SETTINGPAGE_H
+#define SETTINGPAGE_H
 
 #include <QWidget>
+#include <QVBoxLayout>
+#include <QLabel>
 
 class SettingPage : public QWidget
 {
@@ -15,4 +17,4 @@ private:
 
 };
 
-#endif // SETTINGS_H
+#endif // SETTINGPAGE_H
